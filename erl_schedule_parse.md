@@ -42,7 +42,8 @@ Text
 * What is Scheduler?
 	+ introduce
 	In erlang runtime syterm, to ensure the effiect, when SMP is enabled, multiple processes will handle the work, so Scheduler comes out, it used to dispatch the tasks to make sure the tasks can be handled by cpu balance.
-	+ scheduler struct
+	+ scheduler struct <br />
+
 ```javascript
 struct ErtsSchedulerData_ {
     /*
@@ -88,7 +89,9 @@ struct ErtsSchedulerData_ {
 #endif
 };
 ```	
-	The struct includes many parameters, They are used to store some values used in procedure, for example current_process is a point to store the erlang runtime main process pointer.
+
+	The struct includes many parameters, They are used to store some values<br/>used in procedure, for example current_process is a point to store the <br />
+erlang runtime main process pointer. </br>
 
 * What is Run queue?
 	+ introduce
