@@ -361,19 +361,19 @@ system when scl is disable.
 
 2.4.1 introduce
 
->   Id = integer(); when 0 =< Id =< 65535
->   IdRange = Id-Id
->   IdOrIdRange = Id | IdRange
->   IdList = IdOrIdRange,IdOrIdRange | IdOrIdRange
->   LogicalIds = L IdList
->   ThreadIds = T IdList | t IdList
->   CoreIds = C IdList | c IdList
->   ProcessorIds = P IdList | p IdList
->   NodeIds = N IdList | n IdList
->   IdDefs       =       LogicalIds ThreadIds CoreIds Proces‐
->    sorIds NodeIds         |         LogicalIds ThreadIds Cor‐
->    eIds NodeIds ProcessorIds
->   CpuTopology = IdDefs:IdDefs | IdDefs
+>   Id = integer(); when 0 =< Id =< 65535  
+>   IdRange = Id-Id  
+>   IdOrIdRange = Id | IdRange  
+>   IdList = IdOrIdRange,IdOrIdRange | IdOrIdRange  
+>   LogicalIds = L IdList  
+>   ThreadIds = T IdList | t IdList  
+>   CoreIds = C IdList | c IdList  
+>   ProcessorIds = P IdList | p IdList  
+>   NodeIds = N IdList | n IdList  
+>   IdDefs       =       LogicalIds ThreadIds CoreIds Proces‐  
+>    sorIds NodeIds         |         LogicalIds ThreadIds Cor‐  
+>    eIds NodeIds ProcessorIds  
+>   CpuTopology = IdDefs:IdDefs | IdDefs  
 
 2.4.2 introduce
 
