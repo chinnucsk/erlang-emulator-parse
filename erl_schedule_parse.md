@@ -23,14 +23,14 @@ Text
 
 * What is SMP?
 
-	+ introduce
++ introduce
 
 SMP (Symmetrical Multi Processor) ,SMP has multiple processors, if you   
 don't open SMP, only one processor works, so the efficient is slow. Erlang   
 runtime system open SMP default, we can open or close SMP by flag `-smp   
 [enable|auto|disable]`. <br />  
 
-	+ instrustion
++ instrustion
 
 ```javascript
 		   -smp enable and -smp starts the Erlang runtime system with SMP sup‐
@@ -45,22 +45,22 @@ runtime system open SMP default, we can open or close SMP by flag `-smp
            NOTE:  The runtime system with SMP support will not be available on
            all supported platforms. See also the +S flag.
 ```
-	+ config
++ config
   
-       config:<br />
-         - compile: `./configure --enable-smp-support`<br />  
-         - close smp emulator: `./configure --disable-smp-support` <br />  
-         - erl start: `-smp enable -smp disable` <br />
+config:<br />
+- compile: `./configure --enable-smp-support`<br />  
+- close smp emulator: `./configure --disable-smp-support` <br />  
+- erl start: `-smp enable -smp disable` <br />
 
 * What is Scheduler?
 
-	+ introduce
++ introduce
 
 In erlang runtime syterm, to ensure the effiect, when SMP is enabled,   
 multiple processes will handle the work, so Scheduler comes out, it used   
 to dispatch the tasks to make sure the tasks can be handled by cpu balance.  
 
-	+ scheduler struct <br />
++ scheduler struct <br />
 
 ```javascript
 
@@ -117,7 +117,7 @@ erlang runtime main process pointer.
 
 * What is Run queue?
 
-	+ introduce <br>
++ introduce <br>
 
 Run queue is a queue for stroring tasks unhandled in erlang runtime   
 system,when before R13, only one run queue ,so schedulers will share the   
@@ -127,7 +127,7 @@ that, every scheduler will own one run queue, so they don't need to
 rob resources, it will improves the efficient,of course the precondition   
 is SMP is enable. 
 
-	+ struct ErtsRunQueue_
++ struct ErtsRunQueue_
 
 ```javascript
 struct ErtsRunQueue_ {
@@ -216,7 +216,7 @@ The struct stores the information of current run queue.
 
 * Scheduler Strategy
 
-	+ introduce
++ introduce
 
 When erlang runtime system runs with SMP enable, will produce the   
 schdulers(number is default current system cpu cores) when you not set erl   
@@ -240,9 +240,9 @@ read operation s and performance.
 
 * erl start parameters about scheduler and cpu
 
-	+ `+rq ReaderGroupsLimit`
++ `+rq ReaderGroupsLimit`
 
-		- introduce
+- introduce
 
 ```javascript
 
@@ -269,9 +269,9 @@ read operation s and performance.
 This parmeters will affect the read perfomance ,but normally we   
 can ignore it for the erlang runtime system start 8 reader groups.
 
-	+ `+S Schedulers:SchedulerOnline`
++ `+S Schedulers:SchedulerOnline`
 
-		- introduce
+- introduce
 
 ```javascript
 
@@ -381,14 +381,14 @@ can ignore it for the erlang runtime system start 8 reader groups.
 
 ```
 
-		- instrustion
+- instrustion
 
 `+S` rule the number of schedulers total and working schedulers,  
 `+sbt` rule the bind type of scheduler, in production environment, we use   
 the default value to start schedulers same with cpu cores, except we use   
 it for other purpose ,for example testing codes in lower system config.
 
-		- code
+- code
 
 ```javascript
 
@@ -398,9 +398,9 @@ it for other purpose ,for example testing codes in lower system config.
 
 ```
 
-	+ `scl true|false`
++ `scl true|false`
 
-		- introduce
+- introduce
 
 ```javascript
 
@@ -416,15 +416,15 @@ it for other purpose ,for example testing codes in lower system config.
 
 ```
 
-		- instruction
+- instruction
 
 `scl` rules whether erlang runtime system can balance tasks   
 when one or more schedulers are busy and others are free, default is of   
 course balance.
 
-	+ `sct CpuTopology` 
++ `sct CpuTopology` 
 
-		- introduce
+- introduce
 
 ```javascript
 
@@ -454,7 +454,7 @@ course balance.
 
 ```
 
-		- introduce
+- introduce
 
 A faked CPU topology that does not reflect how the real CPU   
 topology looks like is likely to decrease the performance of the runtime   
@@ -463,14 +463,14 @@ system.
 When we want to test or other purpose want to have special cpu  
  core and special scheduler to test system perfomance, we can use it.
 
-		- example
+- example
 
 `erl +sct L0-3c0-3 +sbt db +S3:2` start 4 cores has id for 0-3   
 with 3 schedulers ,2 of them works, schedule bind type is default bind.  
 
-	+ `swt very_low|low|medium|high|very_high`
++ `swt very_low|low|medium|high|very_high`
 
-		- introduce
+- introduce
 
 ```javascript
 
@@ -484,11 +484,11 @@ with 3 schedulers ,2 of them works, schedule bind type is default bind.
 
 ```
 
-		- instruction
+- instruction
 
 Simply say, let the system knows when to wake up the sleeping schedulers.  
 
-        - code
+- code
 
 ```javascript
 
