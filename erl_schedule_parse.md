@@ -92,13 +92,25 @@ struct ErtsSchedulerData_ {
 };
 ```	
 
-	<p> The struct includes many parameters, They are used to store some values  used in procedure, for example current_process is a point to store the erlang   runtime main process pointer. </p> 
+	The struct includes many parameters, They are used to store some values   
+used in procedure, for example current_process is a point to store the   
+erlang runtime main process pointer.
+
 
 * What is Run queue?
+
 	+ introduce <br>
-	Run queue is a queue for stroring tasks unhandled in erlang runtime system,
-when before R13, only one run queue ,so schedulers will share the same run queue, so we need the lock to avoid errors, obviousely the effient is low for the many schedulers rob the same run queue. But after that, every scheduler will own one run queue, so they don't need to rob resources, it will improves the efficient,of course the precondition is SMP is enable.
+
+	Run queue is a queue for stroring tasks unhandled in erlang runtime   
+system,when before R13, only one run queue ,so schedulers will share the   
+same run queue, so we need the lock to avoid errors, obviousely the   
+effient is low for the many schedulers rob the same run queue. But after  
+that, every scheduler will own one run queue, so they don't need to   
+rob resources, it will improves the efficient,of course the precondition   
+is SMP is enable. 
+
 	+ struct ErtsRunQueue_
+
 ```javascript
 struct ErtsRunQueue_ {
     int ix;
@@ -147,8 +159,12 @@ struct ErtsRunQueue_ {
     } ports;
 };
 ```
-	The struct stores the information about balance flag(To show whether run queque is balance), wakeup reds(Scheduler can be sleep, so wakeup reds to show wheter to be waked up), Procs(The process  to run work), ports(which to port to run work) and so on.	
 
+	The struct stores the information about balance flag(To show whether   
+run queque is balance), wakeup reds(Scheduler can be sleep, so wakeup reds   
+to show wheter to be waked up), Procs(The process  to run work),   
+ports(which to port to run work) and so on.
+	
 ```javascript
 typedef struct {
     Process* first;
@@ -171,7 +187,9 @@ typedef struct {
     } migrate;
 } ErtsRunQueueInfo;
 ```
+
 	The struct stores the information of current run queue.
+
 
 * Scheduler Strategy
 	+ introduce
