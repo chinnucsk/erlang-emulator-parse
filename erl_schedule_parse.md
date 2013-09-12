@@ -47,6 +47,7 @@ Text
 	+ scheduler struct <br />
 
 ```javascript
+
 struct ErtsSchedulerData_ {
     /*
      * Keep X registers first (so we get as many low
@@ -90,8 +91,9 @@ struct ErtsSchedulerData_ {
     Allctr_t *verify_unused_temp_alloc_data;
 #endif
 };
-```	
 
+``` 
+ 
 	The struct includes many parameters, They are used to store some values   
 used in procedure, for example current_process is a point to store the   
 erlang runtime main process pointer.
@@ -166,14 +168,18 @@ to show wheter to be waked up), Procs(The process  to run work),
 ports(which to port to run work) and so on.
 	
 ```javascript
+
 typedef struct {
     Process* first;
     Process* last;
 } ErtsRunPrioQueue;
+
+```
 	
 	The struct stores two pointers to point the last and next queue task.
 
 ```javascript
+
 typedef struct {
     int len;
     int max_len;
@@ -186,23 +192,44 @@ typedef struct {
     ErtsRunQueue *runq;
     } migrate;
 } ErtsRunQueueInfo;
+
 ```
 
 	The struct stores the information of current run queue.
 
-
 * Scheduler Strategy
+
 	+ introduce
-	When erlang runtime system runs with SMP enable, will produce the schdulers(number is default current system cpu cores) when you not set erl paras `+s`, every scheduler will have a corresponding run queue for consuming tasks, when one scheduler has many tasks and another has few, so scheduler can balance it and migrate somes works to the scheduler with few tasks.
-	Also some Schedulers are working and some Schedulers are sleeping, and when some sepical conditions it can be waked up ,you can `+swt` to tell emulator when to wake them. 
-	You can tell the emulator how many schedulers will start and how many schedulers will work by paras `erl +s N:M`, the paras i will introduce it below in detail.
-	Erlang system has 8 reader groups, When the amount of schedulers is less than or equal to  the  reader groups  limit,  each  scheduler  has its own reader group. If some schedulers shared one reader group will degrade the read operation s and performance.	
+
+	When erlang runtime system runs with SMP enable, will produce the   
+schdulers(number is default current system cpu cores) when you not set erl   
+paras `+s`, every scheduler will have a corresponding run queue for   
+consuming tasks, when one scheduler has many tasks and another has few,   
+so scheduler can balance it and migrate somes works to the scheduler with   
+few tasks.
+
+	Also some Schedulers are working and some Schedulers are sleeping,   
+and when some sepical conditions it can be waked up ,you can `+swt` to   
+tell emulator when to wake them. 
+
+	You can tell the emulator how many schedulers will start and how many   
+schedulers will work by paras `erl +s N:M`, the paras i will introduce it   
+below in detail. 
+
+	Erlang system has 8 reader groups, When the amount of schedulers is less  
+ than or equal to  the  reader groups  limit,  each  scheduler  has its own   
+reader group. If some schedulers shared one reader group will degrade the   
+read operation s and performance.	
 
 * erl start parameters about scheduler and cpu
+
 	+ `+rq ReaderGroupsLimit`
+
 		- introduce
+
 ```javascript
-		   Limits the amount of reader groups used by read/write  locks  opti‐
+
+           Limits the amount of reader groups used by read/write  locks  opti‐
            mized  for read operations in the Erlang runtime system. By default
            the reader groups limit equals 8.
 
@@ -218,12 +245,19 @@ typedef struct {
            reader  groups  benefits from binding schedulers to logical proces‐
            sors, since the reader groups are distributed better between sched‐
            ulers.
+
 ```
 		- instrustions
-			This parmeters will affect the read perfomance ,but normally we can ignore it for the erlang runtime system start 8 reader groups.
+
+			This parmeters will affect the read perfomance ,but normally we   
+can ignore it for the erlang runtime system start 8 reader groups.
+
 	+ `+S Schedulers:SchedulerOnline`
+
 		- introduce
+
 ```javascript
+
            Sets  the  amount  of  scheduler  threads  to  create and scheduler
            threads to set online when SMP  support  has  been  enabled.  Valid
            range  for  both values are 1-1024. If the Erlang runtime system is
@@ -327,20 +361,33 @@ typedef struct {
              reported to the error_logger. If you  want  to  verify  that  the
              schedulers  actually  have  bound  as requested, call erlang:sys‐
              tem_info(scheduler_bindings).
+
 ```
+
 		- instrustion
-			`+S` rule the number of schedulers total and working schedulers,	`+sbt` rule the bind type of scheduler, in production environment, we use the default value to start schedulers same with cpu cores, except we use it for other purpose ,for example testing codes in lower system config.
+
+			`+S` rule the number of schedulers total and working schedulers,  
+`+sbt` rule the bind type of scheduler, in production environment, we use   
+the default value to start schedulers same with cpu cores, except we use   
+it for other purpose ,for example testing codes in lower system config.
+
 		- code
+
 ```javascript
+
     case 'S' : /* Was handled in early_init() just read past it */
         (void) get_arg(argv[i]+2, argv[i+1], &i);
         break;
 
 ```
+
 	+ `scl true|false`
+
 		- introduce
+
 ```javascript
-			 Enable or disable scheduler compaction of load. By default sched‐
+
+             Enable or disable scheduler compaction of load. By default sched‐
              uler  compaction of load is enabled. When enabled, load balancing
              will strive for a load distribution which causes as  many  sched‐
              uler threads as possible to be fully loaded (i.e., not run out of
@@ -349,13 +396,21 @@ typedef struct {
              quently run out of work. When disabled, the frequency with  which
              schedulers  run out of work will not be taken into account by the
              load balancing logic.
-```
-		- instruction
-			`scl` rules whether erlang runtime system can balance tasks when one or more schedulers are busy and others are free, default is of course balance.
 
-	+ `sct CpuTopology`
+```
+
+		- instruction
+
+			`scl` rules whether erlang runtime system can balance tasks   
+when one or more schedulers are busy and others are free, default is of   
+course balance.
+
+	+ `sct CpuTopology` 
+
 		- introduce
+
 ```javascript
+
              * <Id> = integer(); when 0 =< <Id> =< 65535
 
              * <IdRange> = <Id>-<Id>
@@ -379,27 +434,47 @@ typedef struct {
                eIds><NodeIds><ProcessorIds>
 
              * CpuTopology = <IdDefs>:<IdDefs> | <IdDefs>
+
 ```
+
 		- introduce
-			A faked CPU topology that does not reflect how the real CPU  topology looks like is likely to decrease the performance of the runtime system.
-			When we want to test or other purpose want to have special cpu core and special scheduler to test system perfomance, we can use it.
+
+			A faked CPU topology that does not reflect how the real CPU   
+topology looks like is likely to decrease the performance of the runtime   
+system.
+
+			When we want to test or other purpose want to have special cpu  
+ core and special scheduler to test system perfomance, we can use it.
+
 		- example
-			`erl +sct L0-3c0-3 +sbt db +S3:2` start 4 cores has id for 0-3 with 3 schedulers ,2 of them works, schedule bind type is default bind.
+
+			`erl +sct L0-3c0-3 +sbt db +S3:2` start 4 cores has id for 0-3   
+with 3 schedulers ,2 of them works, schedule bind type is default bind.  
+
 	+ `swt very_low|low|medium|high|very_high`
+
 		- introduce
+
 ```javascript
-			Set scheduler wakeup threshold. Default is medium. The  threshold
+
+             Set scheduler wakeup threshold. Default is medium. The  threshold
              determines  when  to  wake  up sleeping schedulers when more work
              than can be handled by currently awake schedulers  exist.  A  low
              threshold  will  cause earlier wakeups, and a high threshold will
              cause later wakeups. Early wakeups will distribute work over mul‐
              tiple schedulers faster, but work will more easily bounce between
              schedulers.
+
 ```
+
 		- instruction
-			Simply say, let the system knows when to wake up the sleeping schedulers.
+
+			Simply say, let the system knows when to wake up the sleeping schedulers.  
+
 		- code
+
 ```javascript
+
 	case 's' : {
         char *estr;
         int res;
@@ -495,7 +570,7 @@ typedef struct {
             erts_usage();
         }
         }
- 	 else if (sys_strcmp("nsp", sub_param) == 0)
+        else if (sys_strcmp("nsp", sub_param) == 0)
         erts_use_sender_punish = 0;
         else if (sys_strcmp("wt", sub_param) == 0) {
         arg = get_arg(sub_param+2, argv[i+1], &i);
@@ -541,12 +616,20 @@ typedef struct {
         break;
     }
 
-	The Codes show how erlang runtime system handles the args before starting scheduler thread.
 ```
+	The Codes show how erlang runtime system handles the args before starting   
+scheduler thread.
+
 
 * How Scheduler work?
-	In file(`erts/emulator/beam/erl_init.c`), function erl_start is the entry to start erlang system, `erts_start_schedulers();` do first init the scheduler, do some work about creating scheduler thread and init internal parameters and the corresponding main erlang process parameters.
+
+	In file(`erts/emulator/beam/erl_init.c`), function erl_start is the entry   
+to start erlang system, `erts_start_schedulers();` do first init the   
+scheduler, do some work about creating scheduler thread and init internal   
+parameters and the corresponding main erlang process parameters.
+
 ```javascript
+
 void erl_start(int args, char **argv)
 {
 ...
@@ -568,13 +651,25 @@ void erl_start(int args, char **argv)
 
 ...
 }
-```
-	Next, when all erlang runtime syetem init over, we will got to main method, `process_main();`, this function will check if scheduler thread if started or will start again, then will `goto do_schedule1`, run `schedule(c_p, reds_used);`, schedule return a process c_p from run queue, c_p will store as a variable in process_main , then will go into loop switch, execute the basic operations of current process,
-when switch case is MFA, will go to `do_schedule` choose another process and excute it , then loop.
 
-	When there is other task works, the task will add in run queue, the scheduler will balance when checking the run queue flags, `schedule` just pick out the process from run queue and excute it, then it do a loop.	
+```
+
+	Next, when all erlang runtime syetem init over, we will got to main   
+method, `process_main();`, this function will check if scheduler thread   
+if started or will start again, then will `goto do_schedule1`, run   
+`schedule(c_p, reds_used);`, schedule return a process c_p from run queue,   
+c_p will store as a variable in process_main , then will go into loop   
+switch, execute the basic operations of current process, when switch   
+case is MFA, will go to `do_schedule` choose another process and excute it   
+, then loop.
+
+	When there is other task works, the task will add in run queue, the   
+scheduler will balance when checking the run queue flags, `schedule` just   
+pick out the process from run queue and excute it, then it do a loop.	
+
 
 ```javascript
+
 void process_main(void)
 {
 ...
@@ -596,10 +691,13 @@ do_schedule:
 
 ...
 }
+
 ```
 
-	First , let us see the funcion erl_start_schedulers()
+	First , let us see the funcion erl_start_schedulers();
+
 ```javascript
+
 void
 erts_start_schedulers(void)
 {
@@ -654,15 +752,31 @@ erts_start_schedulers(void)
     erts_send_error_to_logger_nogl(dsbufp);
     }
 }
+
 ```
-	In funtion erts_start_schedulers, first do some init about some value, wanted stores the parameters system default define(erts_no_schedulers), wanted_no_schedulers stores system default define(erts_no_schedulers), actual init 0, next varable (want actual wanted_no_schedulers) change with the parameters we pass to system and system actual conditon. 
-	 Some other opts about we defined when erl start, next, init a variable esdp(is a ErtsSchedulerData) for using later, then init  esdp with `ethr_thr_create(&aux_tid, aux_thread, NULL, &opts)`, judge if actual<wanted, or will cause error, judge if actual<1 ,or will cause error. this two judges mainly to verify whether the number of scheduers we set if valid.
-	Last judge the return of ethr_thr_create, if res != 0, means create scheduler thread failed, if success, our init over.
+
+	In funtion erts_start_schedulers, first do some init about some value,   
+wanted stores the parameters system default define(erts_no_schedulers),   
+wanted_no_schedulers stores system default define(erts_no_schedulers),   
+actual init 0, next varable (want actual wanted_no_schedulers) change   
+with the parameters we pass to system and system actual conditon. 
+
+	 Some other opts about we defined when erl start, next, init a variable   
+esdp(is a ErtsSchedulerData) for using later, then init  esdp with   
+`ethr_thr_create(&aux_tid, aux_thread, NULL, &opts)`, judge if actual<wanted,   
+or will cause error, judge if actual<1 ,or will cause error. this two   
+judges mainly to verify whether the number of scheduers we set if valid.
+
+	Last judge the return of ethr_thr_create, if res != 0, means create   
+scheduler thread failed, if success, our init over.
+
 
 Next ,let go into ethr_thr_create to see how to create a thread.
+
+
 ```javascript
-int
-ethr_thr_create(ethr_tid *tid, void * (*func)(void *), void *arg,
+
+int ethr_thr_create(ethr_tid *tid, void * (*func)(void *), void *arg,
         ethr_thr_opts *opts)
 {
     ethr_thr_wrap_data__ twd;
@@ -773,16 +887,31 @@ ethr_thr_create(ethr_tid *tid, void * (*func)(void *), void *arg,
     ethr_thr_parent_func__(twd.prep_func_res);
     return res;
 }
+
 ```
-	Fucntion ethr_thr_create mainly to create a scheduler thread, first define `pthread_attr attr`(for stroring thread attrs and informaitons), use_stack_size(if we define in erl start, it will be value we set when the value are checked is valid else it will default value).
-	Call `pthread_attr_init(&attr)` to init the attrs in thread, if !=0, init failed else init success.
-	Call `pthread_attr_setscope()` to Schedule child thread in system scope, if !=0, set error else set success.
+
+	Fucntion ethr_thr_create mainly to create a scheduler thread, first   
+define `pthread_attr attr`(for stroring thread attrs and informaitons),   
+use_stack_size(if we define in erl start, it will be value we set when   
+the value are checked is valid else it will default value).
+
+	Call `pthread_attr_init(&attr)` to init the attrs in thread, if !=0,  
+ init failed else init success.
+
+	Call `pthread_attr_setscope()` to Schedule child thread in system scope,  
+ if !=0, set error else set success.
+
 	Call `pthread_attr_setdetachstate()` to set thread detach property.
-	Call `pthread_create((pthread_t *) tid, &attr, thr_wrapper, (void*) &twd);` , `thr_wrapper` is used to create event, set the value of twd.
-	Last whil loop, check the value of twd.result to initialize the child unitl to 0.
+
+	Call `pthread_create((pthread_t *) tid, &attr, thr_wrapper, (void*) &twd);`   , `thr_wrapper` is used to create event, set the value of twd.
+
+	Last while loop, check the value of twd.result to initialize the child   
+unitl to 0.
+
 	Now the init funcion over.
 
 ```javascript
+
 Process *schedule(Process *p, int calls)
 {
     ErtsRunQueue *rq;
@@ -888,18 +1017,42 @@ check_activities_to_run: {
 ...
 
 }
-```
-	Function has parameter process, this is the main erlang system process, this funcion update run queue and scheduler data in process, in erlang system , process is the main line , structs including all main datas, all operations are done in it. 
-	Function schedule is used to schedule tasks,first define (run queue, prio queue, scheduler data).
-	Then clean up after the process being scheduled out.
-	Next define some jump block `check_activites_to_run`,`continue_check_activities_to_run`, check the rq's flags to udpate esdp, if `rq->flags & ERTS_RUNQ_FLGS_IMMIGRATE_QMASK`,will immigrate run queue rq; if `(rq->flags & (ERTS_RUNQ_FLG_CHK_CPU_BIND| ERTS_RUNQ_FLG_SUSPENDED))` will suspend_scheduler;if `rq->flags & ERTS_RUNQ_FLG_CHK_CPU_BIND` will check scheduler cpu bind of esdp; these all operations is used to check cureent rq status to find out whether to run rq tasks or go on waiting.
-	When find a port to run, will excute `erts_port_task_execute(rq, &esdp->current_port)`, to do the task, another question If we have performed more than 2*INPUT_REDUCTIONS since last call to erl_sys_schedule() and we still haven't handled all I/O tasks we stop running processes and focus completely on ports.
-	When find a new process, check the flag or rq, and accorrding the flags to redefine the (prio run queque)rpq's pointer to point to hte next process and previosus process. Then it will choose the procoss out of the queuqe.
 
-Next, let's see `erts_port_task_execute`
+```
+
+	Function has parameter process, this is the main erlang system process,   
+this funcion update run queue and scheduler data in process, in erlang system,  
+ process is the main line , structs including all main datas, all operations   
+are done in it. 
+
+	Function schedule is used to schedule tasks,first define (run queue,   
+prio queue, scheduler data).
+
+	Then clean up after the process being scheduled out.
+
+	Next define some jump block `check_activites_to_run`,  
+`continue_check_activities_to_run`, check the rq's flags to udpate esdp,   
+if `rq->flags & ERTS_RUNQ_FLGS_IMMIGRATE_QMASK`,will immigrate run queue rq;   
+if `(rq->flags & (ERTS_RUNQ_FLG_CHK_CPU_BIND| ERTS_RUNQ_FLG_SUSPENDED))`   
+will suspend_scheduler;if `rq->flags & ERTS_RUNQ_FLG_CHK_CPU_BIND` will   
+check scheduler cpu bind of esdp; these all operations is used to check   
+cureent rq status to find out whether to run rq tasks or go on waiting.
+
+	When find a port to run, will excute `erts_port_task_execute(rq,   
+&esdp->current_port)`, to do the task, another question If we have performed  
+ more than 2*INPUT_REDUCTIONS since last call to erl_sys_schedule() and we   
+still haven't handled all I/O tasks we stop running processes and focus   
+completely on ports.
+
+	When find a new process, check the flag or rq, and accorrding the flags   
+to redefine the (prio run queque)rpq's pointer to point to hte next process   
+and previosus process. Then it will choose the procoss out of the queuqe.
+
+Next, let's see `erts_port_task_execute`;
+
 ```javascript
-int
-erts_port_task_execute(ErtsRunQueue *runq, Port **curr_port_pp)
+
+int erts_port_task_execute(ErtsRunQueue *runq, Port **curr_port_pp)
 {
     int port_was_enqueued = 0;
     Port *pp;
@@ -921,7 +1074,19 @@ erts_port_task_execute(ErtsRunQueue *runq, Port **curr_port_pp)
     }
 ...
 ...
+
 ```
-	Schedule aims to pick out a execute process, when find a new port ,will execute port task instantly(switch current port), if not found, will go to pick process.
-	When port tasks come in, scheduler will schedule the tasks use `erl_port_task_schedue()` and sequence them.
-	`erts_port_task_execute`:Run all scheduled tasks for the first port in run queue. If new tasks appear while running reschedule port (free task is an exception; it is always handled instantly). erts_port_task_execute() is called by scheduler threads between scheduleing of processes. Sched lock should be held by caller.
+
+	Schedule aims to pick out a execute process, when find a new port ,  
+will execute port task instantly(switch current port), if not found, will   
+go to pick process.
+
+	When port tasks come in, scheduler will schedule the tasks use   
+`erl_port_task_schedue()` and sequence them.
+
+	`erts_port_task_execute`:Run all scheduled tasks for the first port in   
+run queue. If new tasks appear while running reschedule port (free task is   
+an exception; it is always handled instantly). erts_port_task_execute() is   
+called by scheduler threads between scheduleing of processes. Sched lock   
+should be held by caller.
+
