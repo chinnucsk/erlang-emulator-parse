@@ -238,9 +238,9 @@ read operation s and performance.
 
 2 erl start parameters about scheduler and cpu
 
-21 `+rq ReaderGroupsLimit`
+2.1 `+rq ReaderGroupsLimit`
 
-211 introduce
+2.1.1 introduce
 
 >  Limits the amount of reader groups used by read/write  locks  opti‐
 >  mized  for read operations in the Erlang runtime system. By default
@@ -259,14 +259,14 @@ read operation s and performance.
 >  sors, since the reader groups are distributed better between sched‐
 >  ulers.
 
-212 instrustions
+2.1.2 instrustions
 
 This parmeters will affect the read perfomance ,but normally we   
 can ignore it for the erlang runtime system starting 8 reader groups.
 
-22 `+S Schedulers:SchedulerOnline`
+2.2 `+S Schedulers:SchedulerOnline`
 
-221 introduce
+2.2.1 introduce
 
 >  Sets  the  amount  of  scheduler  threads  to  create and scheduler
 >  threads to set online when SMP  support  has  been  enabled. Schedule
@@ -311,7 +311,7 @@ can ignore it for the erlang runtime system starting 8 reader groups.
 >  schedulers  actually  have  bound  as requested, call erlang:sys‐
 >  tem_info(scheduler_bindings).
 
-222 instrustion
+2.2.2 instrustion
 
 If you want to know more about `sbt` type, please read man erl.
 
@@ -324,7 +324,7 @@ Take care the NOTE, it means erlang runtime system bind to logical
 processors will improve the performance, so we need care in development,   
 but we should'n worry, because it defaults to bind logical cores.  
 
-223 code
+2.2.3 code
 
 ```c
 
@@ -334,9 +334,9 @@ but we should'n worry, because it defaults to bind logical cores.
 
 ```
 
-23 `scl true|false`
+2.3 `scl true|false`
 
-231 introduce
+2.3.1 introduce
 
 >  Enable or disable scheduler compaction of load. By default sched‐
 >  uler  compaction of load is enabled. When enabled, load balancing
@@ -348,7 +348,7 @@ but we should'n worry, because it defaults to bind logical cores.
 >  schedulers  run out of work will not be taken into account by the
 >  load balancing logic.
 
-232 instruction
+2.3.2 instruction
 
 `scl` rules whether erlang runtime system can balance tasks   
 when one or more schedulers are busy and others are free, default is of   
@@ -357,25 +357,25 @@ course balance.
 We just know this para's funtion is ok, you can test performance or 
 system when scl is disable.
 
-24 `sct CpuTopology` 
+2.4 `sct CpuTopology` 
 
-241 introduce
+2.4.1 introduce
 
->  * <Id> = integer(); when 0 =< <Id> =< 65535
->  * <IdRange> = <Id>-<Id>
->  * <IdOrIdRange> = <Id> | <IdRange>
->  * <IdList> = <IdOrIdRange>,<IdOrIdRange> | <IdOrIdRange>
->  * <LogicalIds> = L<IdList>
->  * <ThreadIds> = T<IdList> | t<IdList>
->  * <CoreIds> = C<IdList> | c<IdList>
->  * <ProcessorIds> = P<IdList> | p<IdList>
->  * <NodeIds> = N<IdList> | n<IdList>
->  * <IdDefs>       =       <LogicalIds><ThreadIds><CoreIds><Proces‐
->    sorIds><NodeIds>         |         <LogicalIds><ThreadIds><Cor‐
->    eIds><NodeIds><ProcessorIds>
->  * CpuTopology = <IdDefs>:<IdDefs> | <IdDefs>
+>   Id = integer(); when 0 =< Id =< 65535
+>   IdRange = Id-Id
+>   IdOrIdRange = Id | IdRange
+>   IdList = IdOrIdRange,IdOrIdRange | IdOrIdRange
+>   LogicalIds = L IdList
+>   ThreadIds = T IdList | t IdList
+>   CoreIds = C IdList | c IdList
+>   ProcessorIds = P IdList | p IdList
+>   NodeIds = N IdList | n IdList
+>   IdDefs       =       LogicalIds ThreadIds CoreIds Proces‐
+>    sorIds NodeIds         |         LogicalIds ThreadIds Cor‐
+>    eIds NodeIds ProcessorIds
+>   CpuTopology = IdDefs:IdDefs | IdDefs
 
-242 introduce
+2.4.2 introduce
 
 A faked CPU topology that does not reflect how the real CPU   
 topology looks like is likely to decrease the performance of the runtime   
@@ -393,14 +393,14 @@ uniform, to improve the performance of system.
 
 Read more about `sct` please read `man erl`. 
 
-243 example
+2.4.3 example
 
 `erl +sct L0-3c0-3 +sbt db +S3:2` start 4 cores has id for 0-3   
 with 3 schedulers ,2 of them works, schedule bind type is default bind.  
 
-25 `swt very_low|low|medium|high|very_high`
+2.5 `swt very_low|low|medium|high|very_high`
 
-251 introduce
+2.5.1 introduce
 
 >  Set scheduler wakeup threshold. Default is medium. The  threshold
 >  determines  when  to  wake  up sleeping schedulers when more work
@@ -410,7 +410,7 @@ with 3 schedulers ,2 of them works, schedule bind type is default bind.
 >  tiple schedulers faster, but work will more easily bounce between
 >  schedulers.
 
-252 instruction
+2.5.2 instruction
 
 Simply say, let the system knows when to wake up the sleeping schedulers.  
 
