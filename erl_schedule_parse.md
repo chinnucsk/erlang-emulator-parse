@@ -19,7 +19,9 @@ Text
 
 * What is SMP?
 	+ introduce
+
 	SMP (Symmetrical Multi Processor) ,SMP has multiple processors, if you don't open SMP, only one processor works, so the efficient is slow. Erlang runtime system open SMP default, we can open or close SMP by flag `-smp [enable|auto|disable]`. <br />
+
 	+ instrustion
 ```javascript
 		   -smp enable and -smp starts the Erlang runtime system with SMP sup‐
@@ -90,11 +92,10 @@ struct ErtsSchedulerData_ {
 };
 ```	
 
-	The struct includes many parameters, They are used to store some values<br/>used in procedure, for example current_process is a point to store the <br />
-erlang runtime main process pointer. </br>
+	The struct includes many parameters, They are used to store some values  used in procedure, for example current_process is a point to store the erlang   runtime main process pointer.  
 
 * What is Run queue?
-	+ introduce
+	+ introduce <br>
 	Run queue is a queue for stroring tasks unhandled in erlang runtime system,
 when before R13, only one run queue ,so schedulers will share the same run queue, so we need the lock to avoid errors, obviousely the effient is low for the many schedulers rob the same run queue. But after that, every scheduler will own one run queue, so they don't need to rob resources, it will improves the efficient,of course the precondition is SMP is enable.
 	+ struct ErtsRunQueue_
