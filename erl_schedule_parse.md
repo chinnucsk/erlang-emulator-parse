@@ -92,7 +92,7 @@ struct ErtsSchedulerData_ {
 };
 ```	
 
-	The struct includes many parameters, They are used to store some values  used in procedure, for example current_process is a point to store the erlang   runtime main process pointer.  
+	<p> The struct includes many parameters, They are used to store some values  used in procedure, for example current_process is a point to store the erlang   runtime main process pointer. </p> 
 
 * What is Run queue?
 	+ introduce <br>
