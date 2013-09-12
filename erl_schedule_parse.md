@@ -1,11 +1,11 @@
 erl_schedule_parse
 =================
 
-__Authors:__[`lucas`](mailto:564985699@qq.com).
+__Authors: __[`lucas`](mailto:564985699@qq.com).
 
-__HomePage:__[`Erlang Emulator Parse`](http://lucas564985699.github.io/erlang-emulator-parse).
+__HomePage: __[`Erlang Emulator Parse`](http://lucas564985699.github.io/erlang-emulator-parse).
 
-__Data:__2013-09-10.
+__Data: __2013-09-10.
 
 Introduce
 ---------------
@@ -28,23 +28,22 @@ Text
 SMP (Symmetrical Multi Processor) ,SMP has multiple processors, if you   
 don't open SMP, only one processor works, so the efficient is slow. Erlang   
 runtime system open SMP default, we can open or close SMP by flag `-smp   
-[enable|auto|disable]`. <br />  
+[enable|auto|disable]`.  
 
 2 instrustion
 
-```javascript
-		   -smp enable and -smp starts the Erlang runtime system with SMP sup‐
-           port  enabled.  This may fail if no runtime system with SMP support
-           is available. -smp auto starts the Erlang runtime system  with  SMP
-           support  enabled  if it is available and more than one logical pro‐
-           cessor are detected. -smp disable starts a runtime  system  without
-           SMP support. By default -smp auto will be used unless a conflicting
-           parameter has been passed, then -smp disable  will  be  used.  Cur‐
-           rently only the -hybrid parameter conflicts with -smp auto.
+>  -smp enable and -smp starts the Erlang runtime system with SMP sup‐
+>  port  enabled.  This may fail if no runtime system with SMP support 
+>  is available. -smp auto starts the Erlang runtime system  with  SMP
+>  support  enabled  if it is available and more than one logical pro‐
+>  cessor are detected. -smp disable starts a runtime  system  without
+>  SMP support. By default -smp auto will be used unless a conflicting
+>  parameter has been passed, then -smp disable  will  be  used.  Cur‐
+>  rently only the -hybrid parameter conflicts with -smp auto.
+>
+>  NOTE:  The runtime system with SMP support will not be available on
+>  all supported platforms. See also the +S flag.
 
-           NOTE:  The runtime system with SMP support will not be available on
-           all supported platforms. See also the +S flag.
-```
 3 config
   
 	31 compile: `./configure --enable-smp-support`;   
@@ -61,7 +60,7 @@ to dispatch the tasks to make sure the tasks can be handled by cpu balance.
 
 2 scheduler struct <br />
 
-```javascript
+```c
 
 struct ErtsSchedulerData_ {
     /*
@@ -128,7 +127,7 @@ is SMP is enable.
 
 2 struct ErtsRunQueue_
 
-```javascript
+```c
 struct ErtsRunQueue_ {
     int ix;
     erts_smp_atomic32_t info_flags;
@@ -183,7 +182,7 @@ run queque is balance), wakeup reds(Scheduler can be sleep, so wakeup reds
 to show wheter to be waked up), Procs(The process  to run work),   
 ports(which to port to run work) and so on.
 	
-```javascript
+```c
 
 typedef struct {
     Process* first;
@@ -194,7 +193,7 @@ typedef struct {
 	
 The struct stores two pointers to point the last and next queue task.
 
-```javascript
+```c
 
 typedef struct {
     int len;
@@ -243,154 +242,91 @@ read operation s and performance.
 
 211 introduce
 
-```javascript
+>  Limits the amount of reader groups used by read/write  locks  opti‐
+>  mized  for read operations in the Erlang runtime system. By default
+>  the reader groups limit equals 8.
+>
+>  When the amount of schedulers is less than or equal to  the  reader
+>  groups  limit,  each  scheduler  has its own reader group. When the
+>  amount of schedulers is larger than the reader groups limit, sched‐
+>  ulers  share reader groups. Shared reader groups degrades read lock
+>  and read unlock performance while a large amount of  reader  groups
+>  degrades write lock performance, so the limit is a tradeoff between
+>  performance for read operations and performance  for  write  opera‐
+>  tions.  Each  reader  group  currently  consumes  64  byte  in each
+>  read/write lock. Also note  that  a  runtime  system  using  shared
+>  reader  groups  benefits from binding schedulers to logical proces‐
+>  sors, since the reader groups are distributed better between sched‐
+>  ulers.
 
-           Limits the amount of reader groups used by read/write  locks  opti‐
-           mized  for read operations in the Erlang runtime system. By default
-           the reader groups limit equals 8.
-
-           When the amount of schedulers is less than or equal to  the  reader
-           groups  limit,  each  scheduler  has its own reader group. When the
-           amount of schedulers is larger than the reader groups limit, sched‐
-           ulers  share reader groups. Shared reader groups degrades read lock
-           and read unlock performance while a large amount of  reader  groups
-           degrades write lock performance, so the limit is a tradeoff between
-           performance for read operations and performance  for  write  opera‐
-           tions.  Each  reader  group  currently  consumes  64  byte  in each
-           read/write lock. Also note  that  a  runtime  system  using  shared
-           reader  groups  benefits from binding schedulers to logical proces‐
-           sors, since the reader groups are distributed better between sched‐
-           ulers.
-
-```
-
-212instrustions
+212 instrustions
 
 This parmeters will affect the read perfomance ,but normally we   
-can ignore it for the erlang runtime system start 8 reader groups.
+can ignore it for the erlang runtime system starting 8 reader groups.
 
 22 `+S Schedulers:SchedulerOnline`
 
 221 introduce
 
-```javascript
+>  Sets  the  amount  of  scheduler  threads  to  create and scheduler
+>  threads to set online when SMP  support  has  been  enabled. Schedule
+>  rs will default to logical processors configured, and 
+>  SchedulersOnline will default to logical
+>  processors  available;  otherwise,  the  default  values will be 1.
+>  Schedulers may be omitted  if  :SchedulerOnline  is  not  and  vice
+>  versa.  The  amount of schedulers online can be changed at run time
+>  via erlang:system_flag(schedulers_online, SchedulersOnline).
 
-           Sets  the  amount  of  scheduler  threads  to  create and scheduler
-           threads to set online when SMP  support  has  been  enabled.  Valid
-           range  for  both values are 1-1024. If the Erlang runtime system is
-           able to determine the amount of logical processors  configured  and
-           logical  processors  available,  Schedulers will default to logical
-           processors configured, and SchedulersOnline will default to logical
-           processors  available;  otherwise,  the  default  values will be 1.
-           Schedulers may be omitted  if  :SchedulerOnline  is  not  and  vice
-           versa.  The  amount of schedulers online can be changed at run time
-           via erlang:system_flag(schedulers_online, SchedulersOnline).
+>  This flag will be ignored if the emulator doesn't have SMP  support
+>  enabled (see the -smp flag).
+>  +sFlag Value:
+>  Scheduling specific flags.
 
-           This flag will be ignored if the emulator doesn't have SMP  support
-           enabled (see the -smp flag).
+>  +sbt BindType:
+>  Set scheduler bind type. Currently valid BindTypes:
 
-         +sFlag Value:
-           Scheduling specific flags.
+>  Binding of schedulers is currently only supported on newer Linux,
+>  Solaris, FreeBSD, and Windows systems.
 
-           +sbt BindType:
-             Set scheduler bind type. Currently valid BindTypes:
+>  ... ...			
 
-             u:
-               unbound  -  Schedulers will not be bound to logical processors,
-               i.e., the operating system decides where the scheduler  threads
-               execute, and when to migrate them. This is the default.
+>  The runtime system will by default not bind schedulers to logical
+>  processors.
 
-             ns:
-               no_spread - Schedulers with close scheduler identifiers will be
-               bound as close as possible in hardware.
+>  NOTE:  If  the Erlang runtime system is the only operating system
+>  process that binds threads to logical processors,  this  improves
+>  the  performance of the runtime system. However, if other operat‐
+>  ing system processes (as for example another Erlang runtime  sys‐
+>  tem)  also  bind  threads to logical processors, there might be a
+>  performance penalty  instead.  In  some  cases  this  performance
+>  penalty  might be severe. If this is the case, you are advised to
+>  not bind the schedulers.
 
-             ts:
-               thread_spread - Thread refers to hardware threads (e.g. Intel's
-               hyper-threads). Schedulers with low scheduler identifiers, will
-               be bound to the first hardware thread of each core, then sched‐
-               ulers  with  higher  scheduler identifiers will be bound to the
-               second hardware thread of each core, etc.
+>  ... ...
 
-             ps:
-               processor_spread   -   Schedulers   will   be    spread    like
-               thread_spread, but also over physical processor chips.
-
-             s:
-               spread - Schedulers will be spread as much as possible.
-
-             nnts:
-               no_node_thread_spread  -  Like  thread_spread,  but if multiple
-               NUMA (Non-Uniform Memory Access) nodes exists, schedulers  will
-               be  spread over one NUMA node at a time, i.e., all logical pro‐
-               cessors of one  NUMA  node  will  be  bound  to  schedulers  in
-               sequence.
-
-			nnps:
-               no_node_processor_spread - Like processor_spread, but if multi‐
-               ple NUMA nodes exists, schedulers will be spread over one  NUMA
-               node  at  a time, i.e., all logical processors of one NUMA node
-               will be bound to schedulers in sequence.
-
-             tnnps:
-               thread_no_node_processor_spread    -    A    combination     of
-               thread_spread, and no_node_processor_spread. Schedulers will be
-               spread over hardware threads across NUMA nodes, but  schedulers
-               will only be spread over processors internally in one NUMA node
-               at a time.
-
-             db:
-               default_bind - Binds schedulers the default way. Currently  the
-               default  is thread_no_node_processor_spread (which might change
-               in the future).
-
-             Binding of schedulers is currently only supported on newer Linux,
-             Solaris, FreeBSD, and Windows systems.
-
-             If  no  CPU topology is available when the +sbt flag is processed
-             and BindType is any other type than u, the  runtime  system  will
-             fail  to  start. CPU topology can be defined using the +sct flag.
-             Note that the +sct flag may have to be  passed  before  the  +sbt
-             flag  on the command line (in case no CPU topology has been auto‐
-             matically detected).
-
-             The runtime system will by default not bind schedulers to logical
-             processors.
-
-             NOTE:  If  the Erlang runtime system is the only operating system
-             process that binds threads to logical processors,  this  improves
-             the  performance of the runtime system. However, if other operat‐
-             ing system processes (as for example another Erlang runtime  sys‐
-             tem)  also  bind  threads to logical processors, there might be a
-             performance penalty  instead.  In  some  cases  this  performance
-             penalty  might be severe. If this is the case, you are advised to
-             not bind the schedulers.
-
-             How schedulers are bound matters. For example, in situations when
-             there  are  fewer  running  processes than schedulers online, the
-             runtime system tries to migrate processes to schedulers with  low
-             scheduler  identifiers.  The  more the schedulers are spread over
-             the hardware, the more resources will be available to the runtime
-             system in such situations.
-
-			 NOTE:  If  a scheduler fails to bind, this will often be silently
-             ignored. This since it isn't always possible to verify valid log‐
-             ical  processor  identifiers. If an error is reported, it will be
-             reported to the error_logger. If you  want  to  verify  that  the
-             schedulers  actually  have  bound  as requested, call erlang:sys‐
-             tem_info(scheduler_bindings).
-
-```
+>  NOTE:  If  a scheduler fails to bind, this will often be silently
+>  ignored. This since it isn't always possible to verify valid log‐
+>  ical  processor  identifiers. If an error is reported, it will be
+>  reported to the error_logger. If you  want  to  verify  that  the
+>  schedulers  actually  have  bound  as requested, call erlang:sys‐
+>  tem_info(scheduler_bindings).
 
 222 instrustion
+
+If you want to know more about `sbt` type, please read man erl.
 
 `+S` rule the number of schedulers total and working schedulers,  
 `+sbt` rule the bind type of scheduler, in production environment, we use   
 the default value to start schedulers same with cpu cores, except we use   
 it for other purpose ,for example testing codes in lower system config.
 
+Take care the NOTE, it means erlang runtime system bind to logical   
+processors will improve the performance, so we need care in development,   
+but we should'n worry, because it defaults to bind logical cores.  
+
 223 code
 
-```javascript
+```c
 
     case 'S' : /* Was handled in early_init() just read past it */
         (void) get_arg(argv[i]+2, argv[i+1], &i);
@@ -402,19 +338,15 @@ it for other purpose ,for example testing codes in lower system config.
 
 231 introduce
 
-```javascript
-
-             Enable or disable scheduler compaction of load. By default sched‐
-             uler  compaction of load is enabled. When enabled, load balancing
-             will strive for a load distribution which causes as  many  sched‐
-             uler threads as possible to be fully loaded (i.e., not run out of
-             work). This is accomplished by migrating load (e.g. runnable pro‐
-             cesses)  into  a  smaller  set of schedulers when schedulers fre‐
-             quently run out of work. When disabled, the frequency with  which
-             schedulers  run out of work will not be taken into account by the
-             load balancing logic.
-
-```
+>  Enable or disable scheduler compaction of load. By default sched‐
+>  uler  compaction of load is enabled. When enabled, load balancing
+>  will strive for a load distribution which causes as  many  sched‐
+>  uler threads as possible to be fully loaded (i.e., not run out of
+>  work). This is accomplished by migrating load (e.g. runnable pro‐
+>  cesses)  into  a  smaller  set of schedulers when schedulers fre‐
+>  quently run out of work. When disabled, the frequency with  which
+>  schedulers  run out of work will not be taken into account by the
+>  load balancing logic.
 
 232 instruction
 
@@ -422,37 +354,26 @@ it for other purpose ,for example testing codes in lower system config.
 when one or more schedulers are busy and others are free, default is of   
 course balance.
 
+We just know this para's funtion is ok, you can test performance or 
+system when scl is disable.
+
 24 `sct CpuTopology` 
 
 241 introduce
 
-```javascript
-
-             * <Id> = integer(); when 0 =< <Id> =< 65535
-
-             * <IdRange> = <Id>-<Id>
-
-             * <IdOrIdRange> = <Id> | <IdRange>
-
-             * <IdList> = <IdOrIdRange>,<IdOrIdRange> | <IdOrIdRange>
-
-             * <LogicalIds> = L<IdList>
-
-             * <ThreadIds> = T<IdList> | t<IdList>
-
-             * <CoreIds> = C<IdList> | c<IdList>
-
-             * <ProcessorIds> = P<IdList> | p<IdList>
-
-             * <NodeIds> = N<IdList> | n<IdList>
-
-             * <IdDefs>       =       <LogicalIds><ThreadIds><CoreIds><Proces‐
-               sorIds><NodeIds>         |         <LogicalIds><ThreadIds><Cor‐
-               eIds><NodeIds><ProcessorIds>
-
-             * CpuTopology = <IdDefs>:<IdDefs> | <IdDefs>
-
-```
+>  * <Id> = integer(); when 0 =< <Id> =< 65535
+>  * <IdRange> = <Id>-<Id>
+>  * <IdOrIdRange> = <Id> | <IdRange>
+>  * <IdList> = <IdOrIdRange>,<IdOrIdRange> | <IdOrIdRange>
+>  * <LogicalIds> = L<IdList>
+>  * <ThreadIds> = T<IdList> | t<IdList>
+>  * <CoreIds> = C<IdList> | c<IdList>
+>  * <ProcessorIds> = P<IdList> | p<IdList>
+>  * <NodeIds> = N<IdList> | n<IdList>
+>  * <IdDefs>       =       <LogicalIds><ThreadIds><CoreIds><Proces‐
+>    sorIds><NodeIds>         |         <LogicalIds><ThreadIds><Cor‐
+>    eIds><NodeIds><ProcessorIds>
+>  * CpuTopology = <IdDefs>:<IdDefs> | <IdDefs>
 
 242 introduce
 
@@ -463,6 +384,15 @@ system.
 When we want to test or other purpose want to have special cpu  
  core and special scheduler to test system perfomance, we can use it.
 
+The user  defined  CPU  topology will  override  any  automatically detected CPU topology. The CPU topology is used when binding schedulers to logical processors.
+
+NUMA(Non uniform memory access achitecture), In a node will mangage the memory
+uniform, to improve the performance of system.
+
+`sbt` bind type will define the node bind type, default is tnnps(thread no_node processor_spread), this use NUMA node.
+
+Read more about `sct` please read `man erl`. 
+
 243 example
 
 `erl +sct L0-3c0-3 +sbt db +S3:2` start 4 cores has id for 0-3   
@@ -472,25 +402,30 @@ with 3 schedulers ,2 of them works, schedule bind type is default bind.
 
 251 introduce
 
-```javascript
-
-             Set scheduler wakeup threshold. Default is medium. The  threshold
-             determines  when  to  wake  up sleeping schedulers when more work
-             than can be handled by currently awake schedulers  exist.  A  low
-             threshold  will  cause earlier wakeups, and a high threshold will
-             cause later wakeups. Early wakeups will distribute work over mul‐
-             tiple schedulers faster, but work will more easily bounce between
-             schedulers.
-
-```
+>  Set scheduler wakeup threshold. Default is medium. The  threshold
+>  determines  when  to  wake  up sleeping schedulers when more work
+>  than can be handled by currently awake schedulers  exist.  A  low
+>  threshold  will  cause earlier wakeups, and a high threshold will
+>  cause later wakeups. Early wakeups will distribute work over mul‐
+>  tiple schedulers faster, but work will more easily bounce between
+>  schedulers.
 
 252 instruction
 
 Simply say, let the system knows when to wake up the sleeping schedulers.  
 
+When we start erlang runtime system, we define the schedulers, and sometime   
+we don't need so much scheduler for saving resources normaly, but when system   
+is busy, we hope the system to handle the information quickly, so we need   
+more schedulers to schedule the tasks, so we can set this paras to know   
+when to wake up scheduler to work.
+
+When schedulers waked up, the schedulers will balance the tasks between the  
+schedulers to work more frequently.
+
 253 code
 
-```javascript
+```c
 
 	case 's' : {
         char *estr;
@@ -646,7 +581,7 @@ to start erlang system, `erts_start_schedulers();` do first init the
 scheduler, do some work about creating scheduler thread and init internal   
 parameters and the corresponding main erlang process parameters.
 
-```javascript
+```c
 
 void erl_start(int args, char **argv)
 {
@@ -686,7 +621,7 @@ scheduler will balance when checking the run queue flags, `schedule` just
 pick out the process from run queue and excute it, then it do a loop.	
 
 
-```javascript
+```c
 
 void process_main(void)
 {
@@ -714,7 +649,7 @@ do_schedule:
 
 First , let us see the funcion erl_start_schedulers();
 
-```javascript
+```c
 
 void erts_start_schedulers(void)
 {
@@ -791,7 +726,7 @@ scheduler thread failed, if success, our init over.
 Next ,let go into ethr_thr_create to see how to create a thread.
 
 
-```javascript
+```c
 
 int ethr_thr_create(ethr_tid *tid, void * (*func)(void *), void *arg,
         ethr_thr_opts *opts)
@@ -927,7 +862,7 @@ unitl to 0.
 
 Now the init funcion over.
 
-```javascript
+```c
 
 Process *schedule(Process *p, int calls)
 {
@@ -1067,7 +1002,7 @@ and previosus process. Then it will choose the procoss out of the queuqe.
 
 Next, let's see `erts_port_task_execute`;
 
-```javascript
+```c
 
 int erts_port_task_execute(ErtsRunQueue *runq, Port **curr_port_pp)
 {
